@@ -8,9 +8,8 @@ defmodule Vaultex.Read do
     {:reply, {:error, ["Not Authenticated"]}, state}
   end
 
-
   defp handle_response({:ok, response}, state) do
-    case response.body |> Poison.Parser.parse! do
+    case response.body |> Poison.Parser.parse!(%{}) do
       %{"errors" => []} -> {:reply, {:error, ["Key not found"]}, state}
       %{"errors" => messages} -> {:reply, {:error, messages}, state}
       parsed_resp -> {:reply, {:ok, parsed_resp}, state}
@@ -18,7 +17,7 @@ defmodule Vaultex.Read do
   end
 
   defp handle_response({_, %HTTPoison.Error{reason: reason}}, state) do
-      {:reply, {:error, ["Bad response from vault [#{state.url}]", reason]}, state}
+    {:reply, {:error, ["Bad response from vault [#{state.url}]", reason]}, state}
   end
 
   defp request(method, url, params = %{}, headers) do
